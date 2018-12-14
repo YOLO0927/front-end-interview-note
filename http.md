@@ -28,7 +28,7 @@
   3. chrome 下可以修改 chrome 引用路径后加上参数以降低安全性标准来去除跨域要求
 
   ** JSONP原理：** 首先 jsonp 只能是 get 方式的请求，设置请求类型为 jsonp 后，请求的 query 参数需加上一个 callback 属性声明 jsonp 返回时触发的函数名，所以 jsonp 本质上是默认加多一个 callback 参数入 query 上，然后通过服务端获取这个 callback 的值后，将需要返回的 json 通过这个 callback 的值利用调用函数的方式包裹返回，以下为我个人写的简短例子，如果用 jq 的话，会自动触发指定 callback 函数将参数注入 success 的响应参数内，如果前端是原生请求，大家还需要自行声明 callback 值的函数（原生的话是你自己定的，你肯定知道吧= =），函数参数即是返回的响应。
-  ```
+  ```js
     // 前端
     $('[name="button"]').click(function () {
       $.ajax({
@@ -60,7 +60,7 @@
     jQuery33102673488075454209_1544601431418({"name":"YOLO"})
   ```
   ** cors 设置：** 通过后端修改响应头部允许方法的白名单来实现配置，例如我下面 node 的例子，其他语言是一样的道理
-  ```
+  ```js
     // 单个请求
     router.post('/test', async (ctx, next) => {
       let data = {

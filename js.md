@@ -11,7 +11,7 @@
 * 网易业务 API 设计题：加入A，B，C模块需要用户信息，让你设计一个API去实现这个用户信息获取的公共方法，不能出现重复请求，（比如A来获取时，本地没有，需要向服务器发请求，这个请求发送过程中B又来请求）考察任务队列
 
   本题考察创建任务队列与闭包 => 我的答案：
-  ```
+  ```js
   var getHttpUser = function (url) {
     var resStacks = [], userInfo, httpLock = false
 
@@ -48,7 +48,7 @@
 * 单页路由应用 Router 的实现机制？
   1. 基于 hashchange 事件的 url 监听，根据路由 change 时提取 url 后通过正则过滤路由深度跳转指定模版，简单实现可参考我博客这篇demo [教你50行代码实现前端路由小轮子](https://mp.csdn.net/mdeditor/78076473#)；
   2. 基于 H5 History 对象的实现操作，通过 `pushState(state, name, url)`，`replaceState``，popState` 实现指定跳转、替换与出栈跳回 3 种操作，监听 popstate 事件的前进后退等事件，由函数中的 `event.state` 可获取事件传递的状态参数来对应修改指定状态，由于 `pushState`、`popState`、`replaceState`没有对应事件监听，所以我们可以通过简单劫持来实现监听与模版的替换，例如
-  ```
+  ```js
     // html
     <a>测试</a>
     // js
@@ -71,7 +71,7 @@
 * 说一下原型链，对象，构造函数之间的一些联系(接下来是我自己的理解，并从这几个点扩展根据个人理解说即可)
   1. 构造函数：首先因为 js 没有类的概念，所以在 js 内我们可以将构造函数当作创建类的定义函数，并在构造函数中使用 this 指向后续实例化对象来以此提供后续类的操作，在 ES6 中将构造函数规划为了类的概念，由此 js 也由类了，用 class 来创建类，在 ES5 类函数本身就是 constructor，即构造实体、构造函数，在 ES6 将此属性单独分离，并引入 super 作为超集引入 this 作为指针引用，简单来说构造函数就是用于创建实体的类定义函数；
   2. 原型链：构造函数中我们可在其中将所需的函数操作写入原型，以此利用实例化来继承原型链上的方法，而一旦继承后就会产生链式关系，由于 ES5 中没有正统继承的概念，所以我们一般以原型实例化来实现继承操作，比如 ES5 原型继承即使赋值实例化对象入原型 `Class1.prototype = new Class2()`，由此 Class1 继承了 Class2 ，Class2 的实例化函数全部被注入 Class1 的原型中，由此便产生了一条简单的原型链，我们通过
-  ```
+  ```js
     var obj = new Class1()
     console.log(obj.__proto__)
   ```
@@ -85,7 +85,7 @@
 * 说一下深拷贝的实现原理
 
   答：就是简单的递归函数，函数内循环遍历拷贝对象的类型，如果为数组或对象这2个地址引用的类型就递归调用创建新的对象或数组遍历赋值，由此递归循环，下面是我的实现 demo
-  ```
+  ```js
   var deepClone = function (target) {
     var judgeType = Object.prototype.toString
     var newObj = new Object(), newArr = new Array(), newTarget
@@ -112,7 +112,7 @@
 * 白板写代码，用最简洁的代码实现数组去重
   1. ES6: `[...new Set([1, 2, 3, 4, 1, 2, 11, 11, 42, 4])]`
   2. ES5:
-  ```
+  ```js
     var arr = [1, 2, 3, 4, 1, 2, 11, 11, 42, 4], obj = {}
     for (var i = 0; i < arr.length; i++) {
       if (obj[arr[i]]) continue
@@ -120,3 +120,37 @@
     }
     Object.values(obj)
   ```
+
+* webpack的原理, loader 和 plugin 是干什么的? 有自己手写过么 ?
+  1. **loader**: loader 其实就是一个函数的 node 模块用于解析相对应的文件格式或文件内容，并在解析完毕后返回，方便下一个 loader 的链式调用继续解析，只需在 webpack 配置中的 module 下的 rules 中声明需要解析的文件格式即可，当同一文件格式需要多个 loader 解析时，使用 use 数组即可，下一个 loader 会接收上一个 loader 返回的解析结果继续解析，并且可通过 options 传递其他参数，且 loader 应该遵循模块化输出的准则，如下
+  ```js
+  module.exports = {
+    //...
+    module: {
+      rules: [
+        {
+          test: /\.js$/,
+          use: [
+            {
+              loader: path.resolve('./test-loader'),
+              options: {/* ... */}
+            }
+          ]
+        }
+      ]
+    }
+    }
+  ```
+  ```js
+    // test-loader.js
+    var fs = require("fs")
+    module.exports = function (content, options) {
+     // todo
+     ...
+     this.callback(null, values...)
+    }
+  ```
+  当写完自己的解析过程后，我们以 `this.callback(err, values...)` 函数返回任意数量的值，别忘记链式 loader 数组是反着遍历执行的，具体写法可详见
+  https://webpack.docschina.org/contribute/writing-a-loader/
+
+  2. **plugin**:
