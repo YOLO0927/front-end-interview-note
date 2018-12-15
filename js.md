@@ -120,37 +120,3 @@
     }
     Object.values(obj)
   ```
-
-* webpack的原理, loader 和 plugin 是干什么的? 有自己手写过么 ?
-  1. **loader**: loader 其实就是一个函数的 node 模块用于解析相对应的文件格式或文件内容，并在解析完毕后返回，方便下一个 loader 的链式调用继续解析，只需在 webpack 配置中的 module 下的 rules 中声明需要解析的文件格式即可，当同一文件格式需要多个 loader 解析时，使用 use 数组即可，下一个 loader 会接收上一个 loader 返回的解析结果继续解析，并且可通过 options 传递其他参数，且 loader 应该遵循模块化输出的准则，如下
-  ```js
-  module.exports = {
-    //...
-    module: {
-      rules: [
-        {
-          test: /\.js$/,
-          use: [
-            {
-              loader: path.resolve('./test-loader'),
-              options: {/* ... */}
-            }
-          ]
-        }
-      ]
-    }
-    }
-  ```
-  ```js
-    // test-loader.js
-    var fs = require("fs")
-    module.exports = function (content, options) {
-     // todo
-     ...
-     this.callback(null, values...)
-    }
-  ```
-  当写完自己的解析过程后，我们以 `this.callback(err, values...)` 函数返回任意数量的值，别忘记链式 loader 数组是反着遍历执行的，具体写法可详见
-  https://webpack.docschina.org/contribute/writing-a-loader/
-
-  2. **plugin**:
