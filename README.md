@@ -9,3 +9,4 @@
 * algorithm（相关算法题）
 * frame（框架相关题，如 vue react 等）
 * project（项目有关的题，我写的是我自己的，这个大家不需要看）
+* automation（自动化）

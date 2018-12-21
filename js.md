@@ -120,3 +120,99 @@
     }
     Object.values(obj)
   ```
+
+* Promise 原理及规范
+  1. Promise/A+ 规范
+    * 一个 Promise 必须处于 3 个状态中的其中一个
+
+      pending（可转换 fulfilled 或 rejected）
+
+      fulfilled（不能转换为其他状态）
+
+      rejected（不能转换为其他状态）
+    * thenable then 是可以串行的链式调用，且具有 onFulfilled 和 onRejected 为可选参数
+    * 错误时必须有抛出异常的原因（reason）
+
+  2. 源码实现
+  ```js
+  var Promise = function (fn) {
+    var deffereds = [],
+        value = null,
+        state = 'pending'
+
+    var resolve = function (newValue) {
+      // 2. 引入状态判断与变换
+      if (state === 'rejected') return ;
+      if (newValue && (typeof newValue === 'object' || typeof newValue === 'function')) {
+        var then = newValue.then
+        if (typeof then === 'function') {
+          then.call(newValue, resolve, reject)
+          return
+        }
+      }
+      value = newValue
+      state = 'fulfilled'
+      finale()
+    }
+
+    function reject (reason) {
+      // 2. 引入状态判断与变换
+      if (state === 'fulfilled') return ;
+      state = 'rejected'
+      value = reason
+      finale()
+    }
+
+    // 3. 串行链式调用
+    this.then = function (onFulfilled, onRejected) {
+      return new Promise((resolve, reject) => {
+        handle({
+          onFulfilled: onFulfilled || null,
+          onRejected: onRejected || null,
+          resolve: resolve,
+          reject: reject
+        })
+      })
+    }
+
+    // 4. 异常错误处理
+    this.catch = function (errFn) {
+      if (state === 'rejected') errFn(value)
+    }
+
+    // 1. 延时异步实现
+    function finale () {
+      setTimeout(() => {
+        deffereds.forEach(deffered => {
+          handle(deffered)
+        })
+      }, 0)
+    }
+
+    function handle (deffered) {
+      // 2. 引入状态判断与变换
+      if (state === 'pending') {
+        deffereds.push(deffered)
+        return ;
+      }
+      var cb = state === 'fulfilled' ? deffered.onFulfilled : deffered.onRejected
+      // 当出错并且没有传入 onRejected 时，直接执行 reject 方法将 state 变为 rejected 状态
+      // 此时如果是 resolve 时代码出错时我们便需要监测到并且手动执行 reject 犯法，所以下面我们要使用 try catch 抓取此情况
+      if (cb === null) {
+        cb = state === 'fulfilled' ? deffered.resolve : deffered.reject
+        cb(value)
+        return ;
+      }
+      // 4. 异常错误处理
+      try {
+        // 如若执行 promise.resolve 时出错这里会抓取异常并执行 reject 方法将异常发出去
+        var ret = cb(value)
+        deffered.resolve(ret)
+      } catch (err) {
+        deffered.reject(err)
+      }
+    }
+
+    fn(resolve, reject)
+  }
+  ```
