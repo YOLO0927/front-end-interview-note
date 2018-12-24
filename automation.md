@@ -148,3 +148,25 @@
     ```
     更多关于编写插件的详情请大家自行查阅文档<br>
     https://webpack.docschina.org/contribute/writing-a-plugin/
+
+* webpack 中路由的动态加载模块
+  可利用 import 语法实现动态导入模块，而在我们正常开发中的单页应用中，一个路由即是一个相对较大的组件，我们只需在路由文件中，动态的异步导入路由组件即可。
+
+  在使用 babel 的情况下使用 [syntax-dynamic-import](https://babeljs.io/docs/en/babel-plugin-syntax-dynamic-import/) babel 插件，这样便可以令 import 返回 promise 来实现动态加载后的挂载处理，在 vue-router 中是直接支持返回的 promise 作为组件引入的，详见 [vue-router 路由懒加载](https://router.vuejs.org/zh/guide/advanced/lazy-loading.html)，由于 promise 是 chunk 函数，若你使用 babel 并支持 async await 的话，你可以可以这样写
+  ```js
+    // promise
+    import('[component-url]').then(component => {
+      // 进行路由挂载
+      ...
+    })
+    // async await
+    var getComponent = async () {
+      let component = await import('[component-url]')
+      return ...
+    }
+    getComponent().then(component => {
+      ...
+    })
+  ```
+
+  现阶段推荐使用 import 的方法替换原本 webpack require.ensure 的方法，否则会比较麻烦，有需要大家可查原本当了解 [webpack-dynamic imports](https://webpack.docschina.org/guides/code-splitting/#%E5%8A%A8%E6%80%81%E5%AF%BC%E5%85%A5-dynamic-imports-)

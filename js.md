@@ -361,7 +361,7 @@
 
 * 介绍自己写过的中间件
 
-  由于 路由、静态文件挂在、session 等都使用开源插件作为中间件处理了，所以自己大部分写的是业务中间件，简单说 2 个
+  由于 路由、静态文件挂载、session 等都使用开源插件作为中间件处理了，所以自己大部分写的是业务中间件，简单说 2 个
   1. 用户是否站内（即是否登录）
     * 首先获取请求携带的用户信息态 cookie，过滤出用户id，去与存储在 session 中的用户id做比较，查看是否相同，若相同则代表已登录过并仍处于缓存保留期间，若 session 中不存在或 cookie 过期则直接返回未登录状态码且前端调起登录页面。
   2. 校验活动是否过期
@@ -377,3 +377,35 @@
   而 Cluster 模块就式简洁的做了这件事，我们直接使用 `cluster.isMaster` 判断当前进程的 cluster 是否为主进程，如果是则去 `cluster.fork` 多个子进程，若不是则直接创建 http 或 https 服务并监听所需端口，此时 cluster 模块创建的子进程会使用上述的集群部署的原理去自动做这件事，此时的 http 服务也是通过 tcp 句柄传递过去接收触发的，由于是同一句柄，所以是同一描述符允许共享端口
 
   详细的 demo 可查看我的博客 https://blog.csdn.net/yolo0927/article/details/81224942
+
+* 数组的扁平化、去重、排序
+
+  排序你可以自己写，也可以直接用 `Array.prototype.sort(cb)` 去自定义，大家自己决定，排序我就写个简单的冒泡吧，突然之间你让我写完所有也不可能啦，所以我就写个最简单的
+   ```js
+   var arr = [[1, 2, 2], [3, 4, 5, 5], [6, 7, 8, 9, [11, 12, [12, 13, [14]]]], 10]
+   var flatten = function (arr) {
+     var newArr = []
+     for (var i = 0; i < arr.length; i++) {
+       if (Array.isArray(arr[i])){
+         newArr = newArr.concat(flatten(arr[i]))
+       } else {
+         newArr.push(arr[i])
+       }
+     }
+     return newArr
+   }
+
+   var up = function (arr) {
+     for (var i = 0; i < arr.length; i++) {
+       for (var j = i + 1; j < arr.length; j++) {
+         if (arr[i] > arr[j]) {
+           var num = arr[i]
+           arr[i] = arr[j]
+           arr[j] = num
+         }
+       }
+     }
+     return arr
+   }
+   console.log(up([...new Set(flatten(arr))]))
+   ```
