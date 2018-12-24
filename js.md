@@ -87,26 +87,32 @@
   答：就是简单的递归函数，函数内循环遍历拷贝对象的类型，如果为数组或对象这2个地址引用的类型就递归调用创建新的对象或数组遍历赋值，由此递归循环，下面是我的实现 demo
   ```js
   var deepClone = function (target) {
-    var judgeType = Object.prototype.toString
-    var newObj = new Object(), newArr = new Array(), newTarget
+      var judgeType = Object.prototype.toString
+      var newObj = new Object(), newArr = new Array(), newTarget
 
-    if (judgeType.call(target) === '[object Object]') {
-      newTarget = newObj
-    } else if (judgeType.call(target) === '[object Array]') {
-      newTarget = newArr
-    } else {
-      return newTarget = target
-    }
-
-    for (key in target) {
-      if (judgeType.call(target[key]) === '[object Object]' || '[object Array]') {
-        newTarget[key] = deepClone(target[key])
+      if (judgeType.call(target) === '[object Object]') {
+        newTarget = newObj
+        for (var key in target) {
+          if (judgeType.call(target[key]) === '[object Object]' || '[object Array]') {
+            newTarget[key] = deepClone(target[key])
+          } else {
+            newTarget[key] = target[key]
+          }
+        }
+      } else if (judgeType.call(target) === '[object Array]') {
+        newTarget = newArr
+        for (var i = 0; i < target.length; i++) {
+          if (judgeType.call(target[i]) === '[object Object]' || '[object Array]') {
+            newTarget[i] = deepClone(target[i])
+          } else {
+            newTarget[i] = target[i]
+          }
+        }
       } else {
-        newTarget[key] = target[key]
+        return newTarget = target
       }
+      return newTarget
     }
-    return newTarget
-  }
   ```
 
 * 白板写代码，用最简洁的代码实现数组去重
@@ -216,3 +222,158 @@
     fn(resolve, reject)
   }
   ```
+  详细过程可参考美团技术博客 https://tech.meituan.com/promise_insight.html
+
+* 简单说明事件委托
+
+  事件委托指利用 dom 事件冒泡的原理，使子元素的事件冒泡到父级元素时，由父级监听并处理的过程，只需在父级监听对应子级事件并判断当前触发的节点是否为子级并执行对应业务操作即可，由此可以达到只监听一个元素与节点便可处理每个指定节点的对应的操作。 下面是简单实现
+  ```html
+    <style>
+    .box{
+        width: 100px;
+        height: 100px;
+        background-color: #bfc;
+        display: inline-block;
+      }
+    </style>
+    <button id="add" type="button" name="button">添加</button>
+    <button id="remove" type="button" name="button">删除</button>
+    <div class="box-parent"></div>
+    <script type="text/javascript">
+      var parent = document.getElementsByClassName('box-parent')[0]
+      document.getElementById('add').addEventListener('click', function (e) {
+        var node = document.createElement('span')
+        node.className = 'box'
+        node.setAttribute('data-index', parent.childElementCount + 1)
+        parent.appendChild(node)
+      })
+      document.getElementById('remove').addEventListener('click', function (e) {
+        parent.removeChild(parent.lastElementChild)
+      })
+      parent.addEventListener('click', function (e) {
+        if (e.target.nodeName === 'SPAN') {
+          console.log(e.target.getAttribute('data-index'))
+        }
+      })
+    </script>
+  ```
+
+* 说一下箭头函数This指向问题
+
+  箭头函数实际上就是一个普通函数 bind(this) 之后的语法糖，使函数中的 this 被绑定在当前地址域中而不会被干扰改变指向（如定时器内），例如
+  ```js
+    var obj = {
+      name: 'yolo',
+      interval: function () {
+        setTimeout(function () {
+          console.log(this)
+        })
+      }
+    }
+    obj.interval()  // window
+
+    // 改造
+    obj.interval = function () {
+      setTimeout((function () {
+        console.log(this)
+      }).bind(this))
+    }
+    obj.interval()  // obj
+  ```
+
+* for in 与 for of 的区别
+  1. **for of** 可以遍历一切具有迭代器的对象，如 数组、字符串，都具有，在其原型链中查看是否具有 `Symbol.iterator` 即可，而对象是没有遍历接口的，即没有迭代器，如果需要可以利用 generator 写一个携带遍历器的对象即可，此外当使用 for of 时不需要再依次调用 next 方法获取，而是直接返回生成器分段返回的结果，且 for of 不会遍历到目标的原型，下面可利用 generator 将对象变为存在遍历器使其满足 for of
+  ```js
+    var obj = {
+      name: 'yolo',
+      age: '25',
+      gender: 'male'
+    }
+
+    obj[Symbol.iterator] = function* () {
+      for (let key in obj) {
+        yield [obj[key], key]
+      }
+    }
+
+    for (let item of obj) {
+      // [ 'yolo', 'name' ]
+      // [ '25', 'age' ]
+      // [ 'male', 'gender' ]
+      console.log(item)
+    }
+  ```
+
+  2. **for in** 没什么好说的，遍历过程中不保证顺序的遍历方式，且遍历出的 key 会隐式转换为字符串并会遍历到对象原型中的可修改属性，所以我们一般只用其遍历对象，因为如果遍历普通数组，不但无法保证顺序，而且会使下标变为字符串而无法进行计算，除非你自己处理
+  ```js
+    Object.prototype.c = 1
+    var obj = {a: 1, b: 2}
+    for (var key in obj) {
+      // a
+      // b
+      // c
+      console.log(key)
+    }
+  ```
+* 说一下你对generator的了解
+  generator 实际上是一个具有分段返回能力的函数，可用于处理多个异步操作来实现分段返回，执行 generator 函数会返回一个遍历器对象，我们可以依次调用这个对象的 next 方法去使其内部协程依次执行，但是一定要注意的是同一事件循环线程下不嫩头同时跑 2 个 生成器的 next，否则会报错已经在 running
+  ```js
+    function* Test () {
+      yield 'hello'
+      yield 'world'
+      return 'ending'
+    }
+    var test = Test()
+    let test1 = test.next() // {value: "hello", done: false}
+    test.next() // {value: "world", done: false}
+    test.next() // {value: "ending", done: true}
+  ```
+  更具体的用法请查看 http://es6.ruanyifeng.com/#docs/generator
+
+* event loop（js 的事件循环机制）
+  搞清楚 2 个就行，哪些是属于 macro task 与 micro task 的任务，明白一个队列中是 micro task 先进行，然后才到 macro task 再 micro task 如此循环
+
+  事件循环的顺序：决定了JavaScript代码的执行顺序。它从script(整体代码)开始第一次循环。之后全局上下文进入函数调用栈。直到调用栈清空(只剩全局)，然后执行所有的micro-task。当所有可执行的micro-task执行完毕之后。循环再次从macro-task开始，找到其中一个任务队列执行完毕，然后再执行所有的micro-task，这样一直循环下去
+
+  **micro task**：process.nextTick, Promise.then, Object.observe(已废弃), MutationObserver(H5)
+
+  **macro task**：script(整体代码), setTimeout, setInterval, setImmediate, I/O, UI rendering
+
+  正确理解后的测试题
+  ```js
+    console.log('a');
+    setTimeout(() => {
+      console.log('b');
+    }, 0);
+    console.log('c');
+    Promise.resolve().then(() => {
+      console.log('d');
+    })
+    .then(() => {
+      console.log('e');
+    });
+
+    console.log('f');
+  ```
+  正确的输出顺序为 acfdeb
+
+  更加详细的解析 https://yangbo5207.github.io/wutongluo/ji-chu-jin-jie-xi-lie/shi-er-3001-shi-jian-xun-huan-ji-zhi.html
+
+* 介绍自己写过的中间件
+
+  由于 路由、静态文件挂在、session 等都使用开源插件作为中间件处理了，所以自己大部分写的是业务中间件，简单说 2 个
+  1. 用户是否站内（即是否登录）
+    * 首先获取请求携带的用户信息态 cookie，过滤出用户id，去与存储在 session 中的用户id做比较，查看是否相同，若相同则代表已登录过并仍处于缓存保留期间，若 session 中不存在或 cookie 过期则直接返回未登录状态码且前端调起登录页面。
+  2. 校验活动是否过期
+    * 直接获取中间件传入活动名的参数，找到 config 中对应活动的配置，查看当前日期是否符合活动配置内所定日期
+
+* 关于 Cluster 集群的多线程服务
+
+  首先必须了解如何利用 tcp 与进程间通信完成集群部署服务（master-worker）
+    1. 从主进程创建 TCP 服务，使用 `child_process` 模块 fork 复制多个子进程，一般按照 cpu 数量 fork（原因是 js 是单进程运算，所以最多只能使用一个核）；
+    2. 向子进程发送tcp句柄，`work.send(message, handle)`，handle 为第一步通过 net 模块创建 tcp 服务并监听端口后返回的 net.server；
+    3. 子进程由 http 或 https 模块创建对应服务，但不需监听端口，并且子进程监听 message 事件，由主进程发送的信息 message 判断当前是否为主进程发出 tcp 句柄时的信息，接受 `net.server` 后监听 connection 事件，当主进程 master 监听到创建连接时响应到子进程 tcp 句柄的 connection 事件中，最后在此调用之前创建的 http 或 https 服务 emit('connection', socket) 触发服务的 request 事件，每次 curl 当前 tcp 服务的端口及 host 时都会触发 connection 事件的主从传递，由此抢占式分发到不同的子进程去处理请求。
+
+  而 Cluster 模块就式简洁的做了这件事，我们直接使用 `cluster.isMaster` 判断当前进程的 cluster 是否为主进程，如果是则去 `cluster.fork` 多个子进程，若不是则直接创建 http 或 https 服务并监听所需端口，此时 cluster 模块创建的子进程会使用上述的集群部署的原理去自动做这件事，此时的 http 服务也是通过 tcp 句柄传递过去接收触发的，由于是同一句柄，所以是同一描述符允许共享端口
+
+  详细的 demo 可查看我的博客 https://blog.csdn.net/yolo0927/article/details/81224942

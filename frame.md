@@ -5,6 +5,37 @@
 
   整体来说，通过定义 getter 访问器实现劫持 dom 树并赋值 dom 中对应双向绑定的变量重构 dom 树，在重构赋值时触发 getter 将 node push 到 watch 队列，后续在改变 dom 中的值时触发 setter 从而触发 watch 队列的遍历更新 view，如此反复进行。
 
+  最简单的例子
+  ```html
+  <body>
+    <input type="text" id="input" value="">
+    <div id="input-display"></div>
+  </body>
+  <script type="text/javascript">
+    var input = document.getElementById('input'),
+        display = document.getElementById('input-display')
+    var data = {
+      test: 'hello world'
+    }
+    var obj = {}
+    Object.defineProperty(obj, 'data', {
+      get () {
+        return data.test
+      },
+      set (val) {
+        input.value = val
+        display.innerHTML = input.value
+        data.test = val
+      }
+    })
+    obj.data = 123
+    input.oninput = function (e) {
+      obj.data = e.target.value
+    }
+  </script>
+  ```
+
+
   详细过程可查看我博客早期的一篇文章 https://blog.csdn.net/yolo0927/article/details/53789075
 
   而 React 是单向绑定的，如若想实现双向绑定，则基于事件更新 state 触发更新 view 即可，所以说 React 是基于事件的双向绑定，而 vue 是通过劫持 dom 定义属性访问器而实现的双向绑定。
