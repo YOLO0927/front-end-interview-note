@@ -170,3 +170,20 @@
   ```
 
   现阶段推荐使用 import 的方法替换原本 webpack require.ensure 的方法，否则会比较麻烦，有需要大家可查原本当了解 [webpack-dynamic imports](https://webpack.docschina.org/guides/code-splitting/#%E5%8A%A8%E6%80%81%E5%AF%BC%E5%85%A5-dynamic-imports-)
+
+* 服务端渲染SSR
+  1. 为什么会重新使用服务端渲染
+
+    由于现在的开发模式造成前后端分离后，前端为了提升用户体验而大量采用了异步请求的方式，导致很多页面在初始化时 html 很多 dom 节点中的内容是空的，在这之后由异步数据来填充，或如今采用三大框架后，vue 是采用 dom 劫持的方式重构 dom，而 react 是采用 virtual-dom，这会导致一开始页面中的内容全是变量名，结果就是爬虫无法爬取到网页内容而影响了 SEO，导致网页排名下降。
+  2. ssr 优势
+    * 提升首屏渲染的速度，尤其是单页应用，由于用户侧的客户端网速与性能是无法预测的，如果前端计算量过大，在移动端部分老旧的手机可能无法撑起繁重的计算过程，这个时候我们将逻辑放在服务端计算好在渲染出来，而客户端只负责解析 html，这就避免了这些繁琐的过程，从而加快首屏渲染的速度；
+    * 首屏渲染时html中的内容已经被加载完毕后才渲染的，有利于 SEO；
+    * 服务端解析后很多动态获取的数据可转化为静态资源，有利于更多的缓存；
+  3. ssr 劣势
+    * 维护较为困难，即使使用 node 做服务端渲染，也需要开发者对 node 比较熟悉；
+    * 部分情况下，用户体验可能较差，比如前端懒加载。
+
+* webpack 的 dev-server 是怎么跑起来的
+  1. 利用 express 创建一个 http 服务，所以你看到 devServer 的配置中是可以配置 host 和 port 的，并使用 websocket 长链接实现实时监听；
+  2. 初始化一个 hash 指，每次触发 HRM（热替换 hot module replace）时会生成一个新的 hash 指，并跟上次的 hash 值做比较，若不同则会触发模块的热替换，若删除了某些模块，或添加了模块，则会触发替换的同时触发浏览器的 reload；
+  3. 如何触发的更新的，实际上是通过 chokidar 模块去监听整个项目下的文件变化来实现的，该模块本质上就是 fs.watch 或 fs.watchFile 去监听指定项目目录下的文件变化，通过文件变化来触发 HMR runtime 异步下载更新，然后通知引用代码完成更新，具体编译原理较复杂可以查阅 webpack 的 [热替换文档](https://webpack.docschina.org/concepts/hot-module-replacement/)
