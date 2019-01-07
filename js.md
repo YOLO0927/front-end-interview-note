@@ -1,4 +1,4 @@
-1. 简短介绍 AMD、CMD、commonJs、ES6 模块系统，以及说明它们之间的区别
+* 简短介绍 AMD、CMD、commonJs、ES6 模块系统，以及说明它们之间的区别
   1. AMD：异步模块加载机制，典型代表 require.js ，推崇依赖前置，先将所需依赖全部定义，然后在依赖加载完毕的回调中使用它，即还没开始使用就需要先定义好，浏览器会先加载完所有依赖再执行代码；
   2. CMD：与 AMD 一样都是异步模块加载机制，典型代表 sea.js ，推崇就近依赖，即依赖懒加载，在代码需要时在加载，与 AMD 的不同的是不论你代码如何写，AMD都是先加载依赖再执行编码，无论你位置放在哪，即使你是将依赖的加载位于代码之后，那么也是先预先加载依赖才执行代码，而 CMD 则是懒加载，你将依赖放在哪加载就是哪加载，是按照代码顺序依次执行代码或加载依赖的
 
@@ -8,7 +8,7 @@
 
     异同：commonJs 是 node 的规范，是同步加载依赖的，AMD、CMD、ES模块都是浏览器侧异步加载模块的，而 ES6 的写法与 AMD、CMD 写法相差很多但简化了引入的代码逻辑，AMD是依赖前置加载，CMD是依赖就近顺序加载。
 
-2. 网易业务 API 设计题：加入A，B，C模块需要用户信息，让你设计一个API去实现这个用户信息获取的公共方法，不能出现重复请求，（比如A来获取时，本地没有，需要向服务器发请求，这个请求发送过程中B又来请求）考察任务队列
+* 网易业务 API 设计题：加入A，B，C模块需要用户信息，让你设计一个API去实现这个用户信息获取的公共方法，不能出现重复请求，（比如A来获取时，本地没有，需要向服务器发请求，这个请求发送过程中B又来请求）考察任务队列
 
   本题考察创建任务队列与闭包 => 我的答案：
   ```js
@@ -45,7 +45,7 @@
   // 调用此模块后 getUser(function (data) { console.log(data) })
   ```
 
-3. 单页路由应用 Router 的实现机制？
+* 单页路由应用 Router 的实现机制？
   1. 基于 hashchange 事件的 url 监听，根据路由 change 时提取 url 后通过正则过滤路由深度跳转指定模版，简单实现可参考我博客这篇demo [教你50行代码实现前端路由小轮子](https://mp.csdn.net/mdeditor/78076473#)；
   2. 基于 H5 History 对象的实现操作，通过 `pushState(state, name, url)`，`replaceState``，popState` 实现指定跳转、替换与出栈跳回 3 种操作，监听 popstate 事件的前进后退等事件，由函数中的 `event.state` 可获取事件传递的状态参数来对应修改指定状态，由于 `pushState`、`popState`、`replaceState`没有对应事件监听，所以我们可以通过简单劫持来实现监听与模版的替换，例如
   ```js
@@ -68,7 +68,7 @@
   ```
   结果大家可自行测试查看
 
-4. 说一下原型链，对象，构造函数之间的一些联系(接下来是我自己的理解，并从这几个点扩展根据个人理解说即可)
+* 说一下原型链，对象，构造函数之间的一些联系(接下来是我自己的理解，并从这几个点扩展根据个人理解说即可)
   1. 构造函数：首先因为 js 没有类的概念，所以在 js 内我们可以将构造函数当作创建类的定义函数，并在构造函数中使用 this 指向后续实例化对象来以此提供后续类的操作，在 ES6 中将构造函数规划为了类的概念，由此 js 也由类了，用 class 来创建类，在 ES5 类函数本身就是 constructor，即构造实体、构造函数，在 ES6 将此属性单独分离，并引入 super 作为超集引入 this 作为指针引用，简单来说构造函数就是用于创建实体的类定义函数；
   2. 原型链：构造函数中我们可在其中将所需的函数操作写入原型，以此利用实例化来继承原型链上的方法，而一旦继承后就会产生链式关系，由于 ES5 中没有正统继承的概念，所以我们一般以原型实例化来实现继承操作，比如 ES5 原型继承即使赋值实例化对象入原型 `Class1.prototype = new Class2()`，由此 Class1 继承了 Class2 ，Class2 的实例化函数全部被注入 Class1 的原型中，由此便产生了一条简单的原型链，我们通过
   ```js
@@ -78,11 +78,11 @@
   可查看到 Class1 的实体的父链为 Class2，这就是最简单的由继承所产生的原型链，而原型链的顶端即为一个具有 constructor 的对象，再向上即为 null，简而言之即是由继承产生的链式原型。
 
 
-5. DOM事件中 target 和 currentTarget 的区别
+* DOM事件中 target 和 currentTarget 的区别
 
   答：event.target 是指触发事件的元素目标，event.currentTarget 是指当前正在处理事件的元素（你绑定的元素），简单来说就是当嵌套 div 时，点击事件同时注册多个 div，外部 div 会接收到内部 div 通过事件冒泡上来的事件，此时内部触发这次事件的 div 就是 target，而你使用外部 div 接收事件做处理时这个外部 div 就是 currentTarget，记住触发元素是 target，监听元素是 currentTarget 即可;
 
-6. 说一下深拷贝的实现原理
+* 说一下深拷贝的实现原理
 
   答：就是简单的递归函数，函数内循环遍历拷贝对象的类型，如果为数组或对象这2个地址引用的类型就递归调用创建新的对象或数组遍历赋值，由此递归循环，下面是我的实现 demo
   ```js
@@ -115,7 +115,7 @@
     }
   ```
 
-7. 白板写代码，用最简洁的代码实现数组去重
+* 白板写代码，用最简洁的代码实现数组去重
   1. ES6: `[...new Set([1, 2, 3, 4, 1, 2, 11, 11, 42, 4])]`
   2. ES5:
   ```js
@@ -127,7 +127,7 @@
     Object.values(obj)
   ```
 
-8. Promise 原理及规范
+* Promise 原理及规范
   1. Promise/A+ 规范
     * 一个 Promise 必须处于 3 个状态中的其中一个
 
@@ -224,7 +224,7 @@
   ```
   详细过程可参考美团技术博客 https://tech.meituan.com/promise_insight.html
 
-9. 简单说明事件委托
+* 简单说明事件委托
 
   事件委托指利用 dom 事件冒泡的原理，使子元素的事件冒泡到父级元素时，由父级监听并处理的过程，只需在父级监听对应子级事件并判断当前触发的节点是否为子级并执行对应业务操作即可，由此可以达到只监听一个元素与节点便可处理每个指定节点的对应的操作。 下面是简单实现
   ```html
@@ -258,7 +258,7 @@
     </script>
   ```
 
-10. 说一下箭头函数 this 指向问题
+* 说一下箭头函数 this 指向问题
 
   箭头函数实际上就是一个普通函数 bind(this) 之后的语法糖，使函数中的 this 被绑定在当前地址域中而不会被干扰改变指向（如定时器内），例如
   ```js
@@ -281,7 +281,7 @@
     obj.interval()  // obj
   ```
 
-11. for in 与 for of 的区别
+* for in 与 for of 的区别
   1. **for of** 可以遍历一切具有迭代器的对象，如 数组、字符串，都具有，在其原型链中查看是否具有 `Symbol.iterator` 即可，而对象是没有遍历接口的，即没有迭代器，如果需要可以利用 generator 写一个携带遍历器的对象即可，此外当使用 for of 时不需要再依次调用 next 方法获取，而是直接返回生成器分段返回的结果，且 for of 不会遍历到目标的原型，下面可利用 generator 将对象变为存在遍历器使其满足 for of
   ```js
     var obj = {
@@ -315,7 +315,8 @@
       console.log(key)
     }
   ```
-12. 说一下你对generator的了解
+* 说一下你对generator的了解
+
   generator 实际上是一个具有分段返回能力的函数，可用于处理多个异步操作来实现分段返回，执行 generator 函数会返回一个遍历器对象，我们可以依次调用这个对象的 next 方法去使其内部协程依次执行，但是一定要注意的是同一事件循环线程下不嫩头同时跑 2 个 生成器的 next，否则会报错已经在 running
   ```js
     function* Test () {
@@ -330,7 +331,8 @@
   ```
   更具体的用法请查看 http://es6.ruanyifeng.com/#docs/generator
 
-13. event loop（js 的事件循环机制）
+* event loop（js 的事件循环机制）
+
   搞清楚 2 个就行，哪些是属于 macro task 与 micro task 的任务，明白一个队列中是 micro task 先进行，然后才到 macro task 再 micro task 如此循环
 
   事件循环的顺序：决定了JavaScript代码的执行顺序。它从script(整体代码)开始第一次循环。之后全局上下文进入函数调用栈。直到调用栈清空(只剩全局)，然后执行所有的micro-task。当所有可执行的micro-task执行完毕之后。循环再次从macro-task开始，找到其中一个任务队列执行完毕，然后再执行所有的micro-task，这样一直循环下去
@@ -359,7 +361,7 @@
 
   更加详细的解析 https://yangbo5207.github.io/wutongluo/ji-chu-jin-jie-xi-lie/shi-er-3001-shi-jian-xun-huan-ji-zhi.html
 
-14. 介绍自己写过的中间件
+* 介绍自己写过的中间件
 
   由于 路由、静态文件挂载、session 等都使用开源插件作为中间件处理了，所以自己大部分写的是业务中间件，简单说 2 个
   1. 用户是否站内（即是否登录）
@@ -367,7 +369,7 @@
   2. 校验活动是否过期
     * 直接获取中间件传入活动名的参数，找到 config 中对应活动的配置，查看当前日期是否符合活动配置内所定日期
 
-15. 关于 Cluster 集群的多线程服务
+* 关于 Cluster 集群的多线程服务
 
   首先必须了解如何利用 tcp 与进程间通信完成集群部署服务（master-worker）
     1. 从主进程创建 TCP 服务，使用 `child_process` 模块 fork 复制多个子进程，一般按照 cpu 数量 fork（原因是 js 是单进程运算，所以最多只能使用一个核）；
@@ -378,7 +380,7 @@
 
   详细的 demo 可查看我的博客 https://blog.csdn.net/yolo0927/article/details/81224942
 
-16. 数组的扁平化、去重、排序
+* 数组的扁平化、去重、排序
 
   排序你可以自己写，也可以直接用 `Array.prototype.sort(cb)` 去自定义，大家自己决定，排序我就写个简单的冒泡吧，突然之间你让我写完所有也不可能啦，所以我就写个最简单的
    ```js
@@ -410,7 +412,7 @@
    console.log(up([...new Set(flatten(arr))]))
    ```
 
-17. 节流函数(throttle)
+* 节流函数(throttle)
 
   原理很简单，记录执行频率的定时器，判断是否为空来决定是否执行，再利用返回的闭包作为监听函数即可，下面为 demo
   ```js
@@ -442,7 +444,7 @@
     console.log(123)
   }, 1000)
   ```
-18. substr、substring、slice 的区别
+* substr、substring、slice 的区别
   1. substr 是用于截取指定下标开始的指定位数 `String.prototype.substr(index[, length])`；
   2. substring 是截取 2 个指定下标之间的字符串，且参数都要为非负 `String.prototype.substring(index[, index])`，当参数为负数时，都被判断为 0；
   3. slice 与 substring 相同，但当参数为负数时代表字符串从末尾倒计的下标，例如
@@ -452,36 +454,36 @@
     str.slice(-3, -1)  // '45'
     str.slice(3, -1)  // '45'
   ```
-19 typeof 与 instanceof 的区别
+* typeof 与 instanceof 的区别
   1. typeof 只能简单判断非引用类型，如若进行引用地址的判断，如 数组 与 对象，则都会判断为 'object';
   2. instanceof 用于判断前者构造函数的原型是否出现在了原型链中；
 
 
-20. 如何实现多重继承
+* 如何实现多重继承
 
   首先明确目的，继承就是为了继承父类的属性与暴露的方法，所以通过 for in 遍历去混入需要继承类的所有属性;（简单明了，不需要重写类，较符合 AOP 概念）
 
-      ```js
-        // 结构
-        var Classroom = function (id) {
-          this.id = id
-        }
-        Classroom.prototype.outClassroomId = function () {
-          return this.id
-        }
+  ```js
+    // 结构
+    var Classroom = function (id) {
+      this.id = id
+    }
+    Classroom.prototype.outClassroomId = function () {
+      return this.id
+    }
 
-        var Student = function (studentId) {
-          this.studentId = studentId
-        }
-        Student.prototype.outStudentId = function () {
-          return this.studentId
-        }
+    var Student = function (studentId) {
+      this.studentId = studentId
+    }
+    Student.prototype.outStudentId = function () {
+      return this.studentId
+    }
 
-        var Person = function (name) {
-          this.name = name
-        }
+    var Person = function (name) {
+      this.name = name
+    }
 
-        var person = new Person('YOLO')
-        mixin(new Student(1), person)
-        mixin(new Classroom(10), person)
-      ```
+    var person = new Person('YOLO')
+    mixin(new Student(1), person)
+    mixin(new Classroom(10), person)
+  ```
