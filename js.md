@@ -508,6 +508,14 @@
       this.name = name
     }
 
+    var mixin = function (sourceObj, targetObj) {
+      for (var key in sourceObj) {
+        if (!targetObj[key]) {
+          targetObj[key] = sourceObj[key]
+        }
+      }
+    }
+
     var person = new Person('YOLO')
     mixin(new Student(1), person)
     mixin(new Classroom(10), person)
