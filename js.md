@@ -382,7 +382,7 @@
 
 * 数组的扁平化、去重、排序
 
-  排序你可以自己写，也可以直接用 `Array.prototype.sort(cb)` 去自定义，大家自己决定，排序我就写个简单的冒泡吧，突然之间你让我写完所有也不可能啦，所以我就写个最简单的
+  排序你可以自己写，也可以直接用 `Array.prototype.sort(cb)` 去自定义，大家自己决定，排序我就写个简单的冒泡吧，突然之间你让我写完所有也不可能啦，所以我就写个常用的冒泡和快排吧
    ```js
    var arr = [[1, 2, 2], [3, 4, 5, 5], [6, 7, 8, 9, [11, 12, [12, 13, [14]]]], 10]
    var flatten = function (arr) {
@@ -397,6 +397,7 @@
      return newArr
    }
 
+   // 冒泡
    var up = function (arr) {
      for (var i = 0; i < arr.length; i++) {
        for (var j = i + 1; j < arr.length; j++) {
@@ -409,6 +410,30 @@
      }
      return arr
    }
+
+   // 快排 （就是根据基准分堆而治之） （调用时需传入需要排序的开始位置与结束位置，即 0 与 arr.length - 1）
+   function quickSort (arr, left, right) {
+      if (left > right) return ;
+      var i = left, j = right, temp = arr[left]
+      while (i !== j) {
+        while (arr[j] >= temp && i < j) {
+          j--
+        }
+        while (arr[i] <= temp && i < j) {
+          i++
+        }
+        if (i < j) {
+          var tmp = arr[j]
+          arr[j] = arr[i]
+          arr[i] = tmp
+        }
+      }
+
+      arr[left] = arr[i]
+      arr[i] = temp
+      quickSort(arr, left, i - 1)
+      quickSort(arr, i + 1, right)
+    }
    console.log(up([...new Set(flatten(arr))]))
    ```
 
