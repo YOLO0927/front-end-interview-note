@@ -46,7 +46,7 @@
   ```
 
 * 单页路由应用 Router 的实现机制？
-  1. 基于 hashchange 事件的 url 监听，根据路由 change 时提取 url 后通过正则过滤路由深度跳转指定模版，简单实现可参考我博客这篇demo [教你50行代码实现前端路由小轮子](https://mp.csdn.net/mdeditor/78076473#)；
+  1. 基于 hashchange 事件的 url 监听，根据路由 change 时提取 url 后通过正则过滤路由深度跳转指定模版，简单实现可参考我博客这篇demo [教你50行代码实现前端路由小轮子](https://blog.csdn.net/yolo0927/article/details/78076473)；
   2. 基于 H5 History 对象的实现操作，通过 `pushState(state, name, url)`，`replaceState``，popState` 实现指定跳转、替换与出栈跳回 3 种操作，监听 popstate 事件的前进后退等事件，由函数中的 `event.state` 可获取事件传递的状态参数来对应修改指定状态，由于 `pushState`、`popState`、`replaceState`没有对应事件监听，所以我们可以通过简单劫持来实现监听与模版的替换，例如
   ```js
     // html
@@ -486,7 +486,7 @@
 
 * 如何实现多重继承
 
-  首先明确目的，继承就是为了继承父类的属性与暴露的方法，所以通过 for in 遍历去混入需要继承类的所有属性;（简单明了，不需要重写类，较符合 AOP 概念）
+  首先明确目的，继承就是为了继承父类的属性与暴露的方法，然而 js 与 java 一样是没有多重继承的概念而只有多层继承，所以我们换种思路通过 for in 遍历去混入需要继承类的所有属性;（简单明了，不需要重写类，较符合 AOP 概念）
 
   ```js
     // 结构
