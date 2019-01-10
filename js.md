@@ -416,6 +416,7 @@
       if (left > right) return ;
       var i = left, j = right, temp = arr[left]
       while (i !== j) {
+        // 取基准点交换时一定要先往前取（j--），如果是先往后取一位（i++），那么此时后一位其实是大于基准点的，然后下次递归时就跳过了这个下标，使得本来要分到基准点后面的被推到了小于基准点的前面一位，这将使分堆出错，导致整个快排出错，倒序也是这个道理
         while (arr[j] >= temp && i < j) {
           j--
         }
@@ -439,7 +440,11 @@
 
 * 节流函数(throttle)
 
-  原理很简单，记录执行频率的定时器，判断是否为空来决定是否执行，再利用返回的闭包作为监听函数即可，下面为 demo
+  1. 原理：很简单，记录执行频率的定时器，判断是否为空来决定是否执行，再利用返回的闭包作为监听函数即可，节流函数志在减少函数的持续触发频率而不会像去抖函数一样持续触发时会静默，在到达规定时间后才执行；
+  2. 使用场景：scroll 事件或 resize 事件时用的较多，我们在窗口 resize 时需要动态改变窗口内元素的宽高字体等尺寸，此时频繁的触发会导致大量的重绘与回流，而用户本质上并不需要看到你更改的如此快，此时为了保证性能我们只要控制触发频率在用户可接收的范围内即可，比如 500ms；
+
+  下面为 demo
+
   ```js
   // interval  为多久触发一次
   // 如果不希望初始触发，则将 first 作为参数传入并设为 false，或直接在原函数内设为 false
@@ -468,6 +473,50 @@
   window.onresize = throttle(function () {
     console.log(123)
   }, 1000)
+  ```
+
+* 去抖函数(debounce)
+  1. 原理：若在指定时间段内频繁触发，则重置计算时间，若最后触发后已经超过指定间隔时间则立刻执行，简单来说利用闭包计算函数触发间隔是否超过指定时间间隔，若未超则重新计时，若超过直接执行业务函数；
+  2. 使用场景：最典型是 input 时 keyup 事件的联想搜索接口调用，当用户正在输入时我们本质上需要等用户将需要搜索的内容输入完毕才启动联想功能，而不是用户每打一个字就立刻触发，这样不但没有达到用户的需求，而且还导致接口的大量无用调用（因为搜索出来根本不是用户需要的）以及页面的频繁回流重绘（因为搜到内容后需要渲染结果）
+
+  下面为 demo
+  ```html
+    <body>
+      <input type="text" onkeyup="inputDebounce(event)" value="">
+    </body>
+    <script type="text/javascript">
+      function debounce (fn, interval) {
+        var timer = null, prev = 0, context, args
+
+        function later () {
+          var now = new Date().getTime()
+          // 计算是否在时间间隔内来判断是重置还是执行业务函数
+          if (now - prev < interval) {
+            timer = setTimeout(later, interval || 0)
+          } else {
+            timer = null
+            clearTimeout(timer)
+            fn.apply(context, args)
+          }
+        }
+
+        return function () {
+          context = this
+          args = arguments
+          prev = new Date().getTime()
+          // 第一次开启或已经经过一次去抖后
+          if (!timer) {
+            timer = setTimeout(later, interval || 0)
+          }
+        }
+      }
+
+      var inputDebounce = debounce(inputChange, 500)
+
+      function inputChange (e) {
+        console.log(e.target.value, '开始去渲染联想内容吧')
+      }
+    </script>
   ```
 * substr、substring、slice 的区别
   1. substr 是用于截取指定下标开始的指定位数 `String.prototype.substr(index[, length])`；
